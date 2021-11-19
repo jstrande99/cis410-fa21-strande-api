@@ -25,6 +25,53 @@ app.get("/hi",(req, res)=>{res.send("Hello World")});
 
 app.get("/",(req, res)=>{res.send("Api is running")});
 
+app.post("/contacts/logout", auth, (req, res)=>{
+    let query = `UPDATE Contact
+    SET token = NULL
+    WHERE ContactPK = ${req.contact.ContactPK}`;
+
+    db.executeQuery(query)
+    .then(()=>{res.status(200).send()})
+    .catch((err)=>{
+        console.log("error in POST /contacts/logout", err);
+        res.status(500).send();
+    })
+
+})
+
+app.get("/reviews/me", auth, async (req, res)=>{ 
+    //1. get contact pk 
+    let contactPK = req.contact.ContactPK;
+
+    if(!contactPK){
+        // console.log("PROBLEM");
+        return res.status(400).send("Bad request");
+    }
+
+    //2. query db user records
+    let query = `SELECT ReviewPK, Review.Summary, Rating, MovieFK, Title
+    FROM Contact
+    LEFT JOIN Review
+    ON Contact.ContactPK = Review.ContactFK
+	LEFT JOIN Movie
+	ON Review.MovieFK = Movie.MoviePK
+	WHERE ContactPK = ${contactPK}`;
+    //3. send back 
+
+    db.executeQuery(query)
+    .then((result)=>{
+        // console.log("RESULTS", result);
+        if(result[0]){
+            res.send(result);
+        }
+        else{res.status(404).send("bad request");}
+    })
+
+    .catch((err)=>{
+        console.log("Error in /review/me", err); 
+        res.status(500).send();
+    })
+})
 
 app.post("/reviews", auth, async (req, res)=>{
     try{
