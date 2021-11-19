@@ -1,5 +1,6 @@
 const { response } = require('express');
 const express = require('express');
+const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -12,7 +13,13 @@ const app = express();
 
 app.use(express.json());
 
-app.listen(5000,()=>{console.log("app is running on port 5000")});
+//az => Csu 
+app.use(cors());
+
+
+//MAKE IT LIVE 
+const PORT = process.env.PORT || 5000;
+app.listen(PORT,()=>{console.log(`app is running on port ${PORT}`)});
 
 app.get("/hi",(req, res)=>{res.send("Hello World")});
 
